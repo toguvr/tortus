@@ -1,17 +1,60 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import { v4 as uuid } from "uuid";
-import { Floor } from "./styles";
+import { Floor, Timer } from "./styles";
+import Tapped from "./assets/virado.png";
+import Plus from "./assets/+.png";
+import Yellow from "./assets/amarelo.png";
+import FinishRole from "./assets/buraco-fim-azul.png";
+import Role from "./assets/buraco.png";
+import Horse from "./assets/cavalo.png";
+import StarDiagonal from "./assets/estrela-diagonal.png";
+import Star from "./assets/estrela.png";
+import L from "./assets/L.png";
+import ArrowDiaognalLimit from "./assets/seta-diagonal-limite.png";
+import ArrowDiaognal from "./assets/seta-diagonal.png";
+import ArrowDoubleDiaognal from "./assets/seta-dupla-diagonal.png";
+import ArrowDouble from "./assets/seta-dupla.png";
+import ArrowDoubleDirectionDiagonal from "./assets/seta-duplo-sentido-diagonal.png";
+import ArrowDoubleDirection from "./assets/seta-duplo-sentido.png";
+import ArrowLimit from "./assets/seta-limite.png";
+import Arrow from "./assets/seta-simples.png";
+import ArrowTriple from "./assets/seta-tripla.png";
+import ArrowTripleDiaognal from "./assets/seta-tripla-diagonal.png";
+import T from "./assets/T.png";
+import V from "./assets/v.png";
+import Red from "./assets/vermelho.png";
+import X from "./assets/x.png";
+import YSecond from "./assets/y.png";
+import YFirst from "./assets/Y.png";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 interface IOption {
   id: string;
   type: string;
   rotate: number;
   tapped: boolean;
+  yellow: boolean;
+  red: boolean;
 }
 function App() {
   const [possibles, setPossibles] = useState([] as IOption[]);
   const [handPlayerOne, setHandPlayerOne] = useState([] as IOption[]);
   const [handPlayerTwo, setHandPlayerTwo] = useState([] as IOption[]);
+  const [floorSelected, setFloorSelected] = useState({} as IOption);
+  const [floorToMoveSelected, setFloorToMoveSelected] = useState({} as IOption);
+  const [handPlayerOneSelected, setHandPlayerOneSelected] = useState(
+    {} as IOption
+  );
+  const [handPlayerTwoSelected, setHandPlayerTwoSelected] = useState(
+    {} as IOption
+  );
+
+  const [moving, setMoving] = useState(false);
+  const [playerTurn, setPlayerTurn] = useState(1);
+  const [timerPlayerOne, setTimerPlayerOne] = useState(5);
+  const [timerPlayerTwo, setTimerPlayerTwo] = useState(5);
+
   // Array.from({ length: 49 }, (_, index) => index + 1)
 
   const options = [
@@ -71,12 +114,18 @@ function App() {
           type: option.type,
           rotate: sortear(rotateOptions),
           tapped: true,
+          yellow: false,
+          red: false,
         });
       }
     });
     let embaralhado = embaralhar(finalOptions);
 
     const compras = comprar(embaralhado, 6);
+
+    for (let compra of compras) {
+      compra.tapped = false;
+    }
 
     setHandPlayerOne([compras[0], compras[1], compras[2]]);
     setHandPlayerTwo([compras[3], compras[4], compras[5]]);
@@ -88,7 +137,10 @@ function App() {
         item.tapped = false;
       }
     });
-
+    embaralhado[0].yellow = true;
+    embaralhado[1].yellow = true;
+    embaralhado[47].red = true;
+    embaralhado[48].red = true;
     setPossibles(embaralhado);
   }
 
@@ -109,39 +161,338 @@ function App() {
     }
   }, [handPlayerOne, handPlayerTwo]);
 
+  function onFloorClick(
+    item: IOption,
+    state: IOption,
+    setState: React.Dispatch<React.SetStateAction<IOption>>
+  ) {
+    if (!moving) {
+      if (state.id === item.id) {
+        return setState({} as IOption);
+      }
+
+      setState(item);
+    } else {
+      if (state.id) {
+        return setFloorToMoveSelected(item);
+      }
+      setState(item);
+    }
+  }
+
+  function turnFloor() {
+    const newPossibles = [...possibles];
+    const itemIndex = newPossibles.findIndex(
+      (possible) => possible.id === floorSelected.id
+    );
+    if (!newPossibles[itemIndex]) {
+      return toast.error("Nenhum piso selecionado");
+    }
+
+    newPossibles[itemIndex].tapped = !newPossibles[itemIndex].tapped;
+    return setPossibles(newPossibles);
+  }
+
+  function rotateFloor(qty: number) {
+    const newPossibles = [...possibles];
+    const itemIndex = newPossibles.findIndex(
+      (possible) => possible.id === floorSelected.id
+    );
+    if (!newPossibles[itemIndex]) {
+      return toast.error("Nenhum piso selecionado");
+    }
+
+    newPossibles[itemIndex]!.rotate += qty;
+
+    return setPossibles(newPossibles);
+  }
+
+  function trade() {
+    const handToSee =
+      playerTurn === 1 ? handPlayerOneSelected : handPlayerTwoSelected;
+    if (!floorSelected.id) {
+      return toast.error("Nenhum piso selecionado");
+    }
+
+    if (!handToSee.id) {
+      return toast.error("Nenhum piso na mão selecionado");
+    }
+
+    const newPossibles = [...possibles];
+    const itemFloorIndex = newPossibles.findIndex(
+      (possible) => possible.id === floorSelected.id
+    );
+
+    if (!newPossibles[itemFloorIndex]) {
+      return toast.error("Nenhum piso encontrado");
+    }
+
+    const handArr = playerTurn === 1 ? handPlayerOne : handPlayerTwo;
+    const handPossibles = [...handArr];
+    const itemHandIndex = handPossibles.findIndex(
+      (possible) => possible.id === handToSee.id
+    );
+
+    if (!handArr[itemHandIndex]) {
+      return toast.error("Nenhum piso na mão encontrado");
+    }
+
+    const currentOnHand = handArr[itemHandIndex];
+    const currentOnFloor = newPossibles[itemFloorIndex];
+
+    if (currentOnFloor.tapped === true) {
+      return toast.error("Pisos virados não podem ser trocados");
+    }
+
+    newPossibles[itemFloorIndex] = currentOnHand;
+    handArr[itemHandIndex] = currentOnFloor;
+
+    const setHand = playerTurn === 1 ? setHandPlayerOne : setHandPlayerTwo;
+    setPossibles(newPossibles);
+    setHand(handArr);
+    const setHandSelected =
+      playerTurn === 1 ? setHandPlayerOneSelected : setHandPlayerTwoSelected;
+
+    setFloorSelected({} as IOption);
+    setHandSelected({} as IOption);
+  }
+
+  function move() {
+    if (!floorSelected.id) {
+      return;
+    }
+
+    if (!floorToMoveSelected.id) {
+      return;
+    }
+
+    const newPossibles = [...possibles];
+    const itemFloorIndex = newPossibles.findIndex(
+      (possible) => possible.id === floorSelected.id
+    );
+
+    if (!newPossibles[itemFloorIndex]) {
+      return toast.error("Nenhum piso encontrado");
+    }
+
+    const itemHandIndex = newPossibles.findIndex(
+      (possible) => possible.id === floorToMoveSelected.id
+    );
+
+    if (!newPossibles[itemHandIndex]) {
+      return toast.error("Nenhum piso encontrado");
+    }
+
+    if (newPossibles[itemFloorIndex].yellow) {
+      newPossibles[itemFloorIndex].yellow = false;
+      newPossibles[itemHandIndex].yellow = true;
+    } else if (newPossibles[itemFloorIndex].red) {
+      newPossibles[itemFloorIndex].red = false;
+      newPossibles[itemHandIndex].red = true;
+    }
+
+    setPossibles(newPossibles);
+
+    setFloorSelected({} as IOption);
+    setFloorToMoveSelected({} as IOption);
+    setMoving(false);
+  }
+
+  useEffect(() => {
+    move();
+  }, [floorToMoveSelected]);
+
+  function getImage(type: string) {
+    switch (type) {
+      case "tapped":
+        return Tapped;
+      case "+":
+        return Plus;
+      case "buraco fim":
+        return FinishRole;
+      case "buraco":
+        return Role;
+      case "y":
+        return YSecond;
+      case "Y":
+        return YFirst;
+      case "seta diagonal":
+        return ArrowDiaognal;
+      case "estrela diagonal":
+        return StarDiagonal;
+      case "cavalo":
+        return Horse;
+      case "estrela":
+        return Star;
+      case "l":
+        return L;
+      case "diagonal limite":
+        return ArrowDiaognalLimit;
+      case "<<":
+        return ArrowDouble;
+      case "diagonal duplo sentido":
+        return ArrowDoubleDirectionDiagonal;
+      case "seta duplo sentido":
+        return ArrowDoubleDirection;
+      case "seta duplo sentido limite":
+        return ArrowLimit;
+      case "<":
+        return Arrow;
+      case "<<<":
+        return ArrowTriple;
+      case "diagonal tripla":
+        return ArrowTripleDiaognal;
+      case "T":
+        return T;
+      case "V":
+        return V;
+      case "x":
+        return X;
+      case "diagonal dupla":
+        return ArrowDoubleDiaognal;
+
+      default:
+        return Yellow;
+    }
+  }
+
+  function tunMoving() {
+    setFloorSelected({} as IOption);
+    setFloorToMoveSelected({} as IOption);
+    setMoving(!moving);
+  }
+
+  function changePlayerTurn(turnToChange: number) {
+    if (playerTurn !== turnToChange) {
+      setPlayerTurn(turnToChange);
+    }
+  }
+
   return (
     <div className="App">
-      <button onClick={generateFloors}>Reset</button>
-      <header className="App-header">
-        <p>Jogador 1</p>
-        {handPlayerOne.map((possible) => (
-          <div key={possible.id}>
-            <div>{possible.type}</div>
-            <div>{possible.rotate}</div>
-          </div>
-        ))}
-      </header>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
+      <div className="hand">
+        <header className="App-header">
+          <p>Jogador 1 {moving && playerTurn === 1 && "(movendo...)"}</p>
+          <div className="mao">
+            {handPlayerOne.map((possible) => (
+              <Floor
+                selected={handPlayerOneSelected.id === possible.id}
+                onClick={() =>
+                  onFloorClick(
+                    possible,
+                    handPlayerOneSelected,
+                    setHandPlayerOneSelected
+                  )
+                }
+                rotate={possible.rotate}
+                key={possible.id}
+              >
+                <img
+                  className="floor"
+                  src={getImage(possible.tapped ? "tapped" : possible.type)}
+                  alt={possible.type}
+                />
+              </Floor>
+            ))}
+          </div>
+          <div>
+            <button onClick={generateFloors}>Reset</button>
+            <button onClick={trade}>{"trade"}</button>
+            <button onClick={turnFloor}>Turn Floor</button>
+            <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
+            <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
+            <button onClick={tunMoving}>{"Mover"}</button>
+          </div>
+        </header>
+        <Timer
+          timeOver={timerPlayerOne <= 0}
+          onClick={() => changePlayerTurn(2)}
+          myTurn={playerTurn === 1}
+        >
+          {timerPlayerOne}
+        </Timer>
+      </div>
       <div className="espaco">
         <div className="tabuleiro">
           {possibles.map((possible) => (
-            <Floor rotate={possible.rotate} key={possible.id}>
-              <div>{possible.type}</div>
-              <div>{possible.rotate}</div>
-              <div>{possible.tapped ? "virado" : "desvirado"}</div>
+            <Floor
+              selected={floorSelected.id === possible.id}
+              selectedMove={floorToMoveSelected.id === possible.id}
+              onClick={() =>
+                onFloorClick(possible, floorSelected, setFloorSelected)
+              }
+              rotate={possible.rotate}
+              key={possible.id}
+            >
+              <img
+                className="floor"
+                src={getImage(possible.tapped ? "tapped" : possible.type)}
+                alt={possible.type}
+              />
+              {possible.yellow && (
+                <img className="pin" src={Yellow} alt={possible.type} />
+              )}
+              {possible.red && (
+                <img className="pin" src={Red} alt={possible.type} />
+              )}
             </Floor>
           ))}
         </div>
       </div>
-      <header className="App-header">
-        <p>Jogador 2</p>
-        {handPlayerTwo.map((possible) => (
-          <div key={possible.id}>
-            <div>{possible.type}</div>
-            <div>{possible.rotate}</div>
+      <div className="hand">
+        <header className="App-header">
+          <p>Jogador 2 {moving && playerTurn === 2 && "(movendo...)"}</p>
+          <div className="mao">
+            {handPlayerTwo.map((possible) => (
+              <Floor
+                selected={handPlayerTwoSelected.id === possible.id}
+                onClick={() =>
+                  onFloorClick(
+                    possible,
+                    handPlayerTwoSelected,
+                    setHandPlayerTwoSelected
+                  )
+                }
+                rotate={possible.rotate}
+                key={possible.id}
+              >
+                <img
+                  className="floor"
+                  src={getImage(possible.tapped ? "tapped" : possible.type)}
+                  alt={possible.type}
+                />
+              </Floor>
+            ))}
           </div>
-        ))}
-      </header>
+          <div>
+            <button onClick={generateFloors}>Reset</button>
+            <button onClick={trade}>{"trade"}</button>
+            <button onClick={turnFloor}>Turn Floor</button>
+            <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
+            <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
+            <button onClick={tunMoving}>{"Mover"}</button>
+          </div>
+        </header>
+        <Timer
+          timeOver={timerPlayerTwo <= 0}
+          onClick={() => changePlayerTurn(1)}
+          myTurn={playerTurn === 2}
+        >
+          {timerPlayerTwo}
+        </Timer>
+      </div>
     </div>
   );
 }
