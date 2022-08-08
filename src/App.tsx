@@ -29,6 +29,8 @@ import YSecond from "./assets/y.png";
 import YFirst from "./assets/Y.png";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTimer } from "react-timer-hook";
+import { type } from "@testing-library/user-event/dist/type";
 interface IOption {
   id: string;
   type: string;
@@ -37,6 +39,7 @@ interface IOption {
   yellow: boolean;
   red: boolean;
 }
+
 function App() {
   const [possibles, setPossibles] = useState([] as IOption[]);
   const [handPlayerOne, setHandPlayerOne] = useState([] as IOption[]);
@@ -52,9 +55,42 @@ function App() {
 
   const [moving, setMoving] = useState(false);
   const [playerTurn, setPlayerTurn] = useState(1);
-  const [timerPlayerOne, setTimerPlayerOne] = useState(5);
-  const [timerPlayerTwo, setTimerPlayerTwo] = useState(5);
+  const [timerPlayerOneOver, setTimerPlayerOneOver] = useState(false);
+  const [timerPlayerTwoOver, setTimerPlayerTwoOver] = useState(false);
+  const [timerPlayerOne, setTimerPlayerOne] = useState(() => {
+    const time = new Date();
+    time.setSeconds(time.getSeconds() + 300);
+    return time;
+  });
+  const [timerPlayerTwo, setTimerPlayerTwo] = useState(() => {
+    const time = new Date();
+    time.setSeconds(time.getSeconds() + 300);
+    return time;
+  });
+  const {
+    seconds,
+    minutes,
 
+    start,
+    pause,
+
+    restart,
+  } = useTimer({
+    expiryTimestamp: timerPlayerOne,
+    onExpire: () => setTimerPlayerOneOver(true),
+    autoStart: false,
+  });
+  const {
+    seconds: secondsTwo,
+    minutes: minutesTwo,
+    start: startTwo,
+    pause: pauseTwo,
+    restart: restartTwo,
+  } = useTimer({
+    expiryTimestamp: timerPlayerTwo,
+    onExpire: () => setTimerPlayerTwoOver(true),
+    autoStart: false,
+  });
   const options = [
     { type: "Y", quantity: 2 },
     { type: "l", quantity: 3 },
@@ -139,10 +175,13 @@ function App() {
     embaralhado[1].yellow = true;
     embaralhado[47].red = true;
     embaralhado[48].red = true;
+    const time = new Date();
+    time.setSeconds(time.getSeconds() + 300);
     setPossibles(embaralhado);
     setPlayerTurn(0);
-    setTimerPlayerOne(5);
-    setTimerPlayerTwo(5);
+
+    restart(time, false);
+    restartTwo(time, false);
   }
 
   useEffect(() => {
@@ -165,8 +204,11 @@ function App() {
   function onFloorClick(
     item: IOption,
     state: IOption,
-    setState: React.Dispatch<React.SetStateAction<IOption>>
+    setState: React.Dispatch<React.SetStateAction<IOption>>,
+    hand: boolean
   ) {
+    console.log("item", item);
+    console.log("state", state);
     if (item.red || item.yellow) {
       if (state.id) {
         if (state.red || state.yellow) {
@@ -177,7 +219,7 @@ function App() {
 
       setState(item);
     } else {
-      if (state.id) {
+      if (state.id && !hand) {
         return setFloorToMoveSelected(item);
       }
       setState(item);
@@ -192,6 +234,9 @@ function App() {
     if (!newPossibles[itemIndex]) {
       return toast.error("Nenhum piso selecionado");
     }
+    if (newPossibles[itemIndex].tapped) {
+      return toast.error("Não pode rodar um piso virado");
+    }
 
     newPossibles[itemIndex].tapped = !newPossibles[itemIndex].tapped;
     return setPossibles(newPossibles);
@@ -204,6 +249,9 @@ function App() {
     );
     if (!newPossibles[itemIndex]) {
       return toast.error("Nenhum piso selecionado");
+    }
+    if (newPossibles[itemIndex].tapped) {
+      return toast.error("Não pode rodar um piso virado");
     }
 
     newPossibles[itemIndex]!.rotate += qty;
@@ -229,6 +277,9 @@ function App() {
 
     if (!newPossibles[itemFloorIndex]) {
       return toast.error("Nenhum piso encontrado");
+    }
+    if (newPossibles[itemFloorIndex].tapped) {
+      return toast.error("Não pode rodar um piso virado");
     }
 
     const handArr = playerTurn === 1 ? handPlayerOne : handPlayerTwo;
@@ -368,6 +419,13 @@ function App() {
   function changePlayerTurn(turnToChange: number) {
     if (playerTurn !== turnToChange) {
       setPlayerTurn(turnToChange);
+      if (turnToChange === 2) {
+        startTwo();
+        pause();
+      } else {
+        start();
+        pauseTwo();
+      }
     }
   }
 
@@ -396,7 +454,8 @@ function App() {
                   onFloorClick(
                     possible,
                     handPlayerOneSelected,
-                    setHandPlayerOneSelected
+                    setHandPlayerOneSelected,
+                    true
                   )
                 }
                 rotate={possible.rotate}
@@ -410,21 +469,22 @@ function App() {
               </Floor>
             ))}
           </div>
-          <div>
-            <button onClick={generateFloors}>Reset</button>
-            <button onClick={trade}>{"trade"}</button>
-            <button onClick={turnFloor}>Turn Floor</button>
-            <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
-            <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
-            <button onClick={tunMoving}>{"Mover"}</button>
-          </div>
+          {playerTurn === 1 && (
+            <div>
+              <button onClick={generateFloors}>Reset</button>
+              <button onClick={trade}>{"trade"}</button>
+              <button onClick={turnFloor}>Turn Floor</button>
+              <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
+              <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
+            </div>
+          )}
         </header>
         <Timer
-          timeOver={timerPlayerOne <= 0}
+          timeOver={timerPlayerOneOver}
           onClick={() => changePlayerTurn(2)}
           myTurn={playerTurn === 1}
         >
-          {timerPlayerOne}
+          {minutes + ":" + seconds}
         </Timer>
       </div>
       <div className="espaco">
@@ -434,7 +494,7 @@ function App() {
               selected={floorSelected.id === possible.id}
               selectedMove={floorToMoveSelected.id === possible.id}
               onClick={() =>
-                onFloorClick(possible, floorSelected, setFloorSelected)
+                onFloorClick(possible, floorSelected, setFloorSelected, false)
               }
               rotate={possible.rotate}
               key={possible.id}
@@ -465,7 +525,8 @@ function App() {
                   onFloorClick(
                     possible,
                     handPlayerTwoSelected,
-                    setHandPlayerTwoSelected
+                    setHandPlayerTwoSelected,
+                    true
                   )
                 }
                 rotate={possible.rotate}
@@ -479,21 +540,22 @@ function App() {
               </Floor>
             ))}
           </div>
-          <div>
-            <button onClick={generateFloors}>Reset</button>
-            <button onClick={trade}>{"trade"}</button>
-            <button onClick={turnFloor}>Turn Floor</button>
-            <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
-            <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
-            <button onClick={tunMoving}>{"Mover"}</button>
-          </div>
+          {playerTurn === 2 && (
+            <div>
+              <button onClick={generateFloors}>Reset</button>
+              <button onClick={trade}>{"trade"}</button>
+              <button onClick={turnFloor}>Turn Floor</button>
+              <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
+              <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
+            </div>
+          )}
         </header>
         <Timer
-          timeOver={timerPlayerTwo <= 0}
+          timeOver={timerPlayerTwoOver}
           onClick={() => changePlayerTurn(1)}
           myTurn={playerTurn === 2}
         >
-          {timerPlayerTwo}
+          {minutesTwo + ":" + secondsTwo}
         </Timer>
       </div>
     </div>
