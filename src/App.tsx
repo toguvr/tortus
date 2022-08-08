@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import { v4 as uuid } from "uuid";
-import { isShorthandPropertyAssignment } from "typescript";
+import { Floor } from "./styles";
 interface IOption {
   id: string;
   type: string;
@@ -123,14 +122,16 @@ function App() {
         ))}
       </header>
 
-      <div className="tabuleiro">
-        {possibles.map((possible) => (
-          <div key={possible.id} className="casa">
-            <div>{possible.type}</div>
-            <div>{possible.rotate}</div>
-            <div>{possible.tapped ? "virado" : "desvirado"}</div>
-          </div>
-        ))}
+      <div className="espaco">
+        <div className="tabuleiro">
+          {possibles.map((possible) => (
+            <Floor rotate={possible.rotate} key={possible.id}>
+              <div>{possible.type}</div>
+              <div>{possible.rotate}</div>
+              <div>{possible.tapped ? "virado" : "desvirado"}</div>
+            </Floor>
+          ))}
+        </div>
       </div>
       <header className="App-header">
         <p>Jogador 2</p>

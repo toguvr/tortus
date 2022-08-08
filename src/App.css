@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  min-height: 100vh;
 }
 
 *{
@@ -45,16 +46,17 @@
   }
 }
 
-.tabuleiro{
-  padding: 10px;
+.espaco{
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-gap: 10px;
+  display: flex;
+  justify-content: center;
+  height: 100%;
 }
 
-.casa{
-  border-radius: 4px;
+.tabuleiro{
   padding: 10px;
-  background: #61dafb;
+  display: grid;
+  grid-template-columns: repeat(7, 80px);
+  grid-auto-rows: 80px;
+  grid-gap: 10px;
 }
