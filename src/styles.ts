@@ -35,8 +35,8 @@ export const Floor = styled.div<FloorProps>`
 
   @media (max-width: 600px) {
     .floor {
-      width: 41px;
-      height: 41px;
+      width: 40px;
+      height: 40px;
     }
   }
 `;

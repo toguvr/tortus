@@ -83,11 +83,11 @@ flex-direction: column;
 }
 @media (max-width: 600px) {
   .tabuleiro{
-    grid-template-columns: repeat(7, 41px);
-    grid-auto-rows: 41px;
+    grid-template-columns: repeat(7, 42px);
+    grid-auto-rows: 42px;
   }
   .mao{
-    grid-template-columns: repeat(3, 41px);
-    grid-auto-rows: 41px;
+    grid-template-columns: repeat(3, 42px);
+    grid-auto-rows: 42px;
   }
 }
