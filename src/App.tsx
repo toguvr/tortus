@@ -57,26 +57,10 @@ function App() {
   const [playerTurn, setPlayerTurn] = useState(1);
   const [timerPlayerOneOver, setTimerPlayerOneOver] = useState(false);
   const [timerPlayerTwoOver, setTimerPlayerTwoOver] = useState(false);
-  const [timerPlayerOne, setTimerPlayerOne] = useState(() => {
-    const time = new Date();
-    time.setSeconds(time.getSeconds() + 300);
-    return time;
-  });
-  const [timerPlayerTwo, setTimerPlayerTwo] = useState(() => {
-    const time = new Date();
-    time.setSeconds(time.getSeconds() + 300);
-    return time;
-  });
-  const {
-    seconds,
-    minutes,
-
-    start,
-    pause,
-
-    restart,
-  } = useTimer({
-    expiryTimestamp: timerPlayerOne,
+  const time = new Date();
+  time.setSeconds(time.getSeconds() + 300);
+  const { seconds, minutes, start, pause, restart } = useTimer({
+    expiryTimestamp: time,
     onExpire: () => setTimerPlayerOneOver(true),
     autoStart: false,
   });
@@ -87,7 +71,7 @@ function App() {
     pause: pauseTwo,
     restart: restartTwo,
   } = useTimer({
-    expiryTimestamp: timerPlayerTwo,
+    expiryTimestamp: time,
     onExpire: () => setTimerPlayerTwoOver(true),
     autoStart: false,
   });
@@ -179,7 +163,8 @@ function App() {
     time.setSeconds(time.getSeconds() + 300);
     setPossibles(embaralhado);
     setPlayerTurn(0);
-
+    setTimerPlayerOneOver(false);
+    setTimerPlayerTwoOver(false);
     restart(time, false);
     restartTwo(time, false);
   }
@@ -207,8 +192,6 @@ function App() {
     setState: React.Dispatch<React.SetStateAction<IOption>>,
     hand: boolean
   ) {
-    console.log("item", item);
-    console.log("state", state);
     if (item.red || item.yellow) {
       if (state.id) {
         if (state.red || state.yellow) {
@@ -233,9 +216,6 @@ function App() {
     );
     if (!newPossibles[itemIndex]) {
       return toast.error("Nenhum piso selecionado");
-    }
-    if (newPossibles[itemIndex].tapped) {
-      return toast.error("Não pode rodar um piso virado");
     }
 
     newPossibles[itemIndex].tapped = !newPossibles[itemIndex].tapped;
@@ -279,7 +259,7 @@ function App() {
       return toast.error("Nenhum piso encontrado");
     }
     if (newPossibles[itemFloorIndex].tapped) {
-      return toast.error("Não pode rodar um piso virado");
+      return toast.error("Não pode trocar por um piso virado");
     }
 
     const handArr = playerTurn === 1 ? handPlayerOne : handPlayerTwo;
