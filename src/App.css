@@ -36,3 +36,15 @@
     transform: rotate(360deg);
   }
 }
+
+.tabuleiro{
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 10px;
+}
+
+.casa{
+
+  background: #61dafb;
+}
