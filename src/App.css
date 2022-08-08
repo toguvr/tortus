@@ -2,6 +2,14 @@
   text-align: center;
 }
 
+*{
+  margin: 0;
+  padding: 0;
+  outline:0;
+  box-sizing: border-box;
+}
+
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -15,12 +23,12 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+
   display: flex;
-  flex-direction: column;
+
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+
   color: white;
 }
 
@@ -38,6 +46,7 @@
 }
 
 .tabuleiro{
+  padding: 10px;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -45,6 +54,7 @@
 }
 
 .casa{
-
+  border-radius: 4px;
+  padding: 10px;
   background: #61dafb;
 }
