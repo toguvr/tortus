@@ -59,7 +59,7 @@ function App() {
   const [timerPlayerTwoOver, setTimerPlayerTwoOver] = useState(false);
   const time = new Date();
   time.setSeconds(time.getSeconds() + 300);
-  const { seconds, minutes, start, pause, restart } = useTimer({
+  const { seconds, minutes, start, resume, pause, restart } = useTimer({
     expiryTimestamp: time,
     onExpire: () => setTimerPlayerOneOver(true),
     autoStart: false,
@@ -68,6 +68,7 @@ function App() {
     seconds: secondsTwo,
     minutes: minutesTwo,
     start: startTwo,
+    resume: resumeTwo,
     pause: pauseTwo,
     restart: restartTwo,
   } = useTimer({
@@ -397,13 +398,19 @@ function App() {
   }
 
   function changePlayerTurn(turnToChange: number) {
+    if (turnToChange === 2 && playerTurn === 1 && timerPlayerOneOver) {
+      return toast.error("Você perdeu, tempo esgotado!");
+    }
+    if (turnToChange === 1 && playerTurn === 2 && timerPlayerTwoOver) {
+      return toast.error("Você perdeu, tempo esgotado!");
+    }
     if (playerTurn !== turnToChange) {
       setPlayerTurn(turnToChange);
       if (turnToChange === 2) {
-        startTwo();
+        resumeTwo();
         pause();
       } else {
-        start();
+        resume();
         pauseTwo();
       }
     }
