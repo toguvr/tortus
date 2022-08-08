@@ -55,8 +55,6 @@ function App() {
   const [timerPlayerOne, setTimerPlayerOne] = useState(5);
   const [timerPlayerTwo, setTimerPlayerTwo] = useState(5);
 
-  // Array.from({ length: 49 }, (_, index) => index + 1)
-
   const options = [
     { type: "Y", quantity: 2 },
     { type: "l", quantity: 3 },
@@ -142,6 +140,9 @@ function App() {
     embaralhado[47].red = true;
     embaralhado[48].red = true;
     setPossibles(embaralhado);
+    setPlayerTurn(0);
+    setTimerPlayerOne(5);
+    setTimerPlayerTwo(5);
   }
 
   useEffect(() => {
@@ -166,9 +167,12 @@ function App() {
     state: IOption,
     setState: React.Dispatch<React.SetStateAction<IOption>>
   ) {
-    if (!moving) {
-      if (state.id === item.id) {
-        return setState({} as IOption);
+    if (item.red || item.yellow) {
+      if (state.id) {
+        if (state.red || state.yellow) {
+          setState(item);
+          return tunMoving();
+        }
       }
 
       setState(item);
@@ -357,7 +361,6 @@ function App() {
   }
 
   function tunMoving() {
-    setFloorSelected({} as IOption);
     setFloorToMoveSelected({} as IOption);
     setMoving(!moving);
   }

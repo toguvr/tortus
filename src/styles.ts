@@ -32,6 +32,13 @@ export const Floor = styled.div<FloorProps>`
     border-radius: 4px;
     transform: ${(props) => `rotate(${props.rotate}deg)`};
   }
+
+  @media (max-width: 600px) {
+    .floor {
+      width: 41px;
+      height: 41px;
+    }
+  }
 `;
 
 interface TimerProps {
@@ -49,4 +56,5 @@ export const Timer = styled.h2<TimerProps>`
     props.timeOver ? "red" : props.myTurn ? "#ff9000" : "lightgray"};
 
   user-select: none;
+  border: #61dafb 2px solid;
 `;
