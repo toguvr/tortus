@@ -280,6 +280,17 @@ function App() {
       return toast.error("Pisos virados não podem ser trocados");
     }
 
+    if (currentOnFloor.red) {
+      currentOnHand.red = true;
+    } else {
+      currentOnHand.red = false;
+    }
+    if (currentOnFloor.yellow) {
+      currentOnHand.yellow = true;
+    } else {
+      currentOnHand.yellow = false;
+    }
+
     newPossibles[itemFloorIndex] = currentOnHand;
     handArr[itemHandIndex] = currentOnFloor;
 
@@ -429,6 +440,7 @@ function App() {
         draggable
         pauseOnHover
       />
+      <button onClick={generateFloors}>Reset</button>
 
       <div className="hand">
         <header className="App-header">
@@ -458,7 +470,6 @@ function App() {
           </div>
           {playerTurn === 1 && (
             <div>
-              <button onClick={generateFloors}>Reset</button>
               <button onClick={trade}>{"trade"}</button>
               <button onClick={turnFloor}>Turn Floor</button>
               <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
@@ -529,7 +540,6 @@ function App() {
           </div>
           {playerTurn === 2 && (
             <div>
-              <button onClick={generateFloors}>Reset</button>
               <button onClick={trade}>{"trade"}</button>
               <button onClick={turnFloor}>Turn Floor</button>
               <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
