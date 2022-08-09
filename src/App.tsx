@@ -439,7 +439,7 @@ function App() {
 
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 1 {moving && playerTurn === 1 && "(movendo...)"}</p>
+          <p>Jogador 1 </p>
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
@@ -517,7 +517,7 @@ function App() {
       </div>
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 2 {moving && playerTurn === 2 && "(movendo...)"}</p>
+          <p>Jogador 2</p>
           <div className="mao">
             {handPlayerTwo.map((possible) => (
               <Floor
