@@ -33,7 +33,7 @@ export const Floor = styled.div<FloorProps>`
     transform: ${(props) => `rotate(${props.rotate}deg)`};
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 650px) {
     .floor {
       width: 40px;
       height: 40px;
@@ -54,6 +54,8 @@ export const Timer = styled.h2<TimerProps>`
   align-items: center;
   background-color: ${(props) =>
     props.timeOver ? "red" : props.myTurn ? "#ff9000" : "lightgray"};
+  color: ${(props) =>
+    props.timeOver ? "white" : props.myTurn ? "white" : "black"};
 
   user-select: none;
   border: #61dafb 2px solid;

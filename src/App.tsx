@@ -193,21 +193,15 @@ function App() {
     setState: React.Dispatch<React.SetStateAction<IOption>>,
     hand: boolean
   ) {
-    if (item.red || item.yellow) {
-      if (state.id) {
-        if (state.red || state.yellow) {
-          setState(item);
-          return tunMoving();
-        }
+    if (!moving) {
+      if (item.red || item.yellow) {
+        setState(item);
+        return tunMoving();
+      } else {
+        return setState(item);
       }
-
-      setState(item);
-    } else {
-      if (state.id && !hand) {
-        return setFloorToMoveSelected(item);
-      }
-      setState(item);
     }
+    return setFloorToMoveSelected(item);
   }
 
   function turnFloor() {
@@ -404,7 +398,6 @@ function App() {
   }
 
   function tunMoving() {
-    setFloorToMoveSelected({} as IOption);
     setMoving(!moving);
   }
 
@@ -440,7 +433,9 @@ function App() {
         draggable
         pauseOnHover
       />
-      <button onClick={generateFloors}>Reset</button>
+      <button className="button" onClick={generateFloors}>
+        Reiniciar
+      </button>
 
       <div className="hand">
         <header className="App-header">
@@ -470,10 +465,18 @@ function App() {
           </div>
           {playerTurn === 1 && (
             <div>
-              <button onClick={trade}>{"trade"}</button>
-              <button onClick={turnFloor}>Turn Floor</button>
-              <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
-              <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
+              <button className="button" onClick={trade}>
+                {"Trocar"}
+              </button>
+              <button className="button" onClick={turnFloor}>
+                Virar
+              </button>
+              <button className="button" onClick={() => rotateFloor(-90)}>
+                {"Rodar <"}
+              </button>
+              <button className="button" onClick={() => rotateFloor(90)}>
+                {"Rodar >"}
+              </button>
             </div>
           )}
         </header>
@@ -540,10 +543,18 @@ function App() {
           </div>
           {playerTurn === 2 && (
             <div>
-              <button onClick={trade}>{"trade"}</button>
-              <button onClick={turnFloor}>Turn Floor</button>
-              <button onClick={() => rotateFloor(-90)}>{"Rotate <"}</button>
-              <button onClick={() => rotateFloor(90)}>{"Rotate >"}</button>
+              <button className="button" onClick={trade}>
+                {"Trocar"}
+              </button>
+              <button className="button" onClick={turnFloor}>
+                Virar
+              </button>
+              <button className="button" onClick={() => rotateFloor(-90)}>
+                {"Rodar <"}
+              </button>
+              <button className="button" onClick={() => rotateFloor(90)}>
+                {"Rodar >"}
+              </button>
             </div>
           )}
         </header>
