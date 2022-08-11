@@ -69,7 +69,7 @@ function OnlineRoom() {
   const [timerPlayerOneOver, setTimerPlayerOneOver] = useState(false);
   const [timerPlayerTwoOver, setTimerPlayerTwoOver] = useState(false);
   const time = new Date();
-  time.setSeconds(time.getSeconds() + 300);
+  time.setSeconds(time.getSeconds() + 3000);
   const { seconds, minutes, resume, pause, restart } = useTimer({
     expiryTimestamp: time,
     onExpire: () => setTimerPlayerOneOver(true),
@@ -122,7 +122,7 @@ function OnlineRoom() {
         if (!!msg.restart) {
           console.log(11);
           const time = new Date();
-          time.setSeconds(time.getSeconds() + 300);
+          time.setSeconds(time.getSeconds() + 3000);
           restart(time, false);
           restartTwo(time, false);
         }
@@ -358,7 +358,7 @@ function OnlineRoom() {
     embaralhado[47].pins = [{ id: 3, color: "red" }];
     embaralhado[48].pins = [{ id: 4, color: "red" }];
     const time = new Date();
-    time.setSeconds(time.getSeconds() + 300);
+    time.setSeconds(time.getSeconds() + 3000);
     setPossibles(embaralhado);
     setPlayerTurn(0);
     setTimerPlayerOneOver(false);
