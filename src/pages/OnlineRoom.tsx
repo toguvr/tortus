@@ -559,7 +559,7 @@ function OnlineRoom() {
         <button className="button" onClick={leaveRoom}>
           Sair
         </button>
-        <h2>Sala {room_id}</h2>
+        <h2 style={{ color: "white" }}>Sala {room_id}</h2>
         <button className="button" onClick={generateFloors}>
           Reiniciar
         </button>
@@ -567,7 +567,7 @@ function OnlineRoom() {
 
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 1 </p>
+          <p>Jogador 1</p>
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
