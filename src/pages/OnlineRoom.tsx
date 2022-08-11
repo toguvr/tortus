@@ -264,15 +264,12 @@ function OnlineRoom() {
     if (!moving) {
       if (item.pins.length > 0) {
         setState(item);
-        tunMoving();
-        return sendMsg();
+        return tunMoving();
       } else {
-        setState(item);
-        return sendMsg();
+        return setState(item);
       }
     }
-    setFloorToMoveSelected(item);
-    return sendMsg();
+    return setFloorToMoveSelected(item);
   }
 
   function turnFloor() {
@@ -289,8 +286,7 @@ function OnlineRoom() {
     }
 
     newPossibles[itemIndex].tapped = !newPossibles[itemIndex].tapped;
-    setPossibles(newPossibles);
-    return sendMsg();
+    return setPossibles(newPossibles);
   }
 
   function rotateFloor(qty: number) {
@@ -311,8 +307,7 @@ function OnlineRoom() {
 
     newPossibles[itemIndex]!.rotate += qty;
 
-    setPossibles(newPossibles);
-    return sendMsg();
+    return setPossibles(newPossibles);
   }
 
   function trade() {
@@ -393,7 +388,6 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setHandSelected({} as IOption);
     setMoving(false);
-    sendMsg();
   }
 
   function move() {
@@ -414,7 +408,6 @@ function OnlineRoom() {
       setFloorSelected({} as IOption);
       setFloorToMoveSelected({} as IOption);
       setMoving(false);
-      sendMsg();
       return toast.error("Nenhum piso selecionado");
     }
 
@@ -439,7 +432,6 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setFloorToMoveSelected({} as IOption);
     setMoving(false);
-    sendMsg();
   }
 
   useEffect(() => {
@@ -506,7 +498,6 @@ function OnlineRoom() {
 
   function tunMoving() {
     setMoving(!moving);
-    sendMsg();
   }
 
   function changePlayerTurn(turnToChange: number) {
@@ -525,7 +516,6 @@ function OnlineRoom() {
         resume();
         pauseTwo();
       }
-      sendMsg();
     }
   }
 
@@ -567,7 +557,7 @@ function OnlineRoom() {
 
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 1</p>
+          <p>Jogador 1 </p>
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
