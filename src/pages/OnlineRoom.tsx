@@ -232,7 +232,6 @@ function OnlineRoom() {
     setTimerPlayerTwoOver(false);
     restart(time, false);
     restartTwo(time, false);
-    sendMsg();
   }
 
   useEffect(() => {
@@ -259,17 +258,21 @@ function OnlineRoom() {
     hand: boolean
   ) {
     if (hand) {
-      return setState(item);
+      setState(item);
+      return sendMsg();
     }
     if (!moving) {
       if (item.pins.length > 0) {
         setState(item);
-        return tunMoving();
+        tunMoving();
+        retur nsendMsg();
       } else {
-        return setState(item);
+        setState(item);
+        return sendMsg();
       }
     }
-    return setFloorToMoveSelected(item);
+    setFloorToMoveSelected(item);
+    return sendMsg();
   }
 
   function turnFloor() {
@@ -286,7 +289,8 @@ function OnlineRoom() {
     }
 
     newPossibles[itemIndex].tapped = !newPossibles[itemIndex].tapped;
-    return setPossibles(newPossibles);
+    setPossibles(newPossibles);
+    return sendMsg();
   }
 
   function rotateFloor(qty: number) {
@@ -307,7 +311,8 @@ function OnlineRoom() {
 
     newPossibles[itemIndex]!.rotate += qty;
 
-    return setPossibles(newPossibles);
+    setPossibles(newPossibles);
+    return sendMsg();
   }
 
   function trade() {
@@ -388,6 +393,7 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setHandSelected({} as IOption);
     setMoving(false);
+    sendMsg();
   }
 
   function move() {
@@ -408,6 +414,7 @@ function OnlineRoom() {
       setFloorSelected({} as IOption);
       setFloorToMoveSelected({} as IOption);
       setMoving(false);
+      sendMsg();
       return toast.error("Nenhum piso selecionado");
     }
 
@@ -432,6 +439,7 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setFloorToMoveSelected({} as IOption);
     setMoving(false);
+    sendMsg();
   }
 
   useEffect(() => {
@@ -516,6 +524,7 @@ function OnlineRoom() {
         resume();
         pauseTwo();
       }
+      sendMsg();
     }
   }
 
