@@ -232,6 +232,7 @@ function OnlineRoom() {
     setTimerPlayerTwoOver(false);
     restart(time, false);
     restartTwo(time, false);
+    sendMsg();
   }
 
   useEffect(() => {
