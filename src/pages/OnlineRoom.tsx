@@ -65,24 +65,27 @@ function OnlineRoom() {
   );
 
   const [moving, setMoving] = useState(false);
-  const [playerTurn, setPlayerTurn] = useState(1);
+  const [playerTurn, setPlayerTurn] = useState(0);
   const [timerPlayerOneOver, setTimerPlayerOneOver] = useState(false);
   const [timerPlayerTwoOver, setTimerPlayerTwoOver] = useState(false);
-  const time = new Date();
-  time.setSeconds(time.getSeconds() + 3000);
-  const { seconds, minutes, resume, pause, restart } = useTimer({
-    expiryTimestamp: time,
+
+  const timeNew = new Date();
+  timeNew.setSeconds(timeNew.getSeconds() + 300);
+
+  const { seconds, minutes, resume, start, pause, restart } = useTimer({
+    expiryTimestamp: timeNew,
     onExpire: () => setTimerPlayerOneOver(true),
     autoStart: false,
   });
   const {
     seconds: secondsTwo,
     minutes: minutesTwo,
+    start: startTwo,
     resume: resumeTwo,
     pause: pauseTwo,
     restart: restartTwo,
   } = useTimer({
-    expiryTimestamp: time,
+    expiryTimestamp: timeNew,
     onExpire: () => setTimerPlayerTwoOver(true),
     autoStart: false,
   });
@@ -122,11 +125,15 @@ function OnlineRoom() {
         if (!!msg.restart) {
           console.log(11);
           const time = new Date();
-          time.setSeconds(time.getSeconds() + 3000);
+          time.setSeconds(time.getSeconds() + 300);
           restart(time, false);
           restartTwo(time, false);
         }
-        if (msg?.possibles.length > 0) {
+        if (
+          msg?.possibles &&
+          Array.isArray(msg?.possibles) &&
+          msg?.possibles.length > 0
+        ) {
           console.log(0);
           setPossibles(msg?.possibles);
         }
@@ -164,30 +171,42 @@ function OnlineRoom() {
           console.log(6);
           setHandPlayerTwoSelected(msg?.handPlayerTwoSelected);
         }
-        // if (msg?.moving && msg?.moving !== moving) {
-        //   console.log(7);
-        //   setMoving(msg?.moving);
-        // }
-        if (msg?.playerTurn != playerTurn) {
-          console.log(8);
-
-          setPlayerTurn(msg?.playerTurn);
+        if (msg?.moving && msg?.moving !== moving) {
+          console.log(7);
+          setMoving(msg?.moving);
         }
-        if (msg?.timerPlayerOneOver !== timerPlayerOneOver) {
+        if (msg?.playerTurn && Number(msg?.playerTurn) !== playerTurn) {
+          console.log(8, msg?.playerTurn);
+          setPlayerTurn(Number(msg?.playerTurn));
+          if (Number(msg?.playerTurn) === 2) {
+            console.log("restartei");
+            startTwo();
+            pause();
+          } else {
+            console.log("restartei 2");
+            start();
+            pauseTwo();
+          }
+        }
+        if (
+          msg?.timerPlayerOneOver !== undefined &&
+          msg?.timerPlayerOneOver !== timerPlayerOneOver
+        ) {
           console.log(9);
           setTimerPlayerOneOver(msg?.timerPlayerOneOver);
         }
-        if (msg?.timerPlayerTwoOver !== timerPlayerTwoOver) {
+        if (
+          msg?.timerPlayerTwoOver !== undefined &&
+          msg?.timerPlayerTwoOver !== timerPlayerTwoOver
+        ) {
           console.log(10);
           setTimerPlayerTwoOver(msg?.timerPlayerTwoOver);
         }
       });
     }
   }, [socket?.id]);
-  // console.log(socket);
 
   const sendMsg = (type: string, data?: any) => {
-    console.log(type);
     switch (type) {
       case "update":
         return socket?.emit("update", data);
@@ -226,7 +245,6 @@ function OnlineRoom() {
           handPlayerTwoSelected:
             data.handPlayerTwoSelected ?? handPlayerTwoSelected,
         });
-
       case "onFloorClickWithPin":
         console.log(data);
         return socket?.emit("update", data);
@@ -246,7 +264,6 @@ function OnlineRoom() {
         console.log("changePlayerTurn", data);
         return socket?.emit("update", data);
       case "move":
-        console.log("move", data);
         return socket?.emit("update", data);
       default:
         return socket?.emit("update", data);
@@ -358,7 +375,7 @@ function OnlineRoom() {
     embaralhado[47].pins = [{ id: 3, color: "red" }];
     embaralhado[48].pins = [{ id: 4, color: "red" }];
     const time = new Date();
-    time.setSeconds(time.getSeconds() + 3000);
+    time.setSeconds(time.getSeconds() + 300);
     setPossibles(embaralhado);
     setPlayerTurn(0);
     setTimerPlayerOneOver(false);
@@ -376,9 +393,6 @@ function OnlineRoom() {
     });
   }
 
-  // useEffect(() => {
-  //   generateFloors();
-  // }, []);
   function onFloorClick(
     item: IOption,
     state: IOption,
@@ -388,29 +402,38 @@ function OnlineRoom() {
   ) {
     if (hand) {
       setState(item);
-      return;
-      // return sendMsg("onFloorClickHandChange", {
-      //   handPlayerOneSelected: player === 1 ? item : handPlayerOneSelected,
-      //   handPlayerTwoSelected: player === 2 ? item : handPlayerTwoSelected,
-      // });
+
+      return sendMsg("onFloorClickHandChange", {
+        room_id,
+        handPlayerOneSelected: player === 1 ? item : handPlayerOneSelected,
+        handPlayerTwoSelected: player === 2 ? item : handPlayerTwoSelected,
+      });
     }
     if (!moving) {
       if (item.pins.length > 0) {
         setState(item);
         tunMoving();
-        return;
+
         // console.log("onFloorClick 2");
-        // return sendMsg("onFloorClickWithPin", { floorSelected: item });
+        return sendMsg("onFloorClickWithPin", {
+          room_id,
+          floorSelected: item,
+        });
       } else {
         setState(item);
+        sendMsg("onFloorClickWithoutPin", {
+          room_id,
+          floorSelected: item,
+        });
         return;
-        // sendMsg("onFloorClickWithoutPin", { floorSelected: item });
       }
     }
     setFloorToMoveSelected(item);
-    return;
-    // console.log("onFloorClick 3");
-    // sendMsg("onFloorClickToMove", { floorToMoveSelected: item });
+
+    sendMsg("onFloorClickToMove", {
+      room_id,
+      floorToMoveSelected: item,
+    });
   }
 
   function turnFloor() {
@@ -430,6 +453,7 @@ function OnlineRoom() {
     setPossibles(newPossibles);
     console.log("turnFloor 1");
     sendMsg("turnFloor", {
+      room_id,
       possibles: newPossibles,
     });
     return;
@@ -540,14 +564,14 @@ function OnlineRoom() {
     setHandSelected({} as IOption);
     setMoving(false);
     // console.log("trade 1");
-    // sendMsg("trade", {
-    //   floorSelected: {} as IOption,
-    //   [playerTurn === 1 ? "handPlayerOne" : "handPlayerTwo"]: handArr,
-    //   [playerTurn === 1 ? "handPlayerOneSelected" : "handPlayerTwoSelected"]:
-    //     {} as IOption,
-    //   moving: false,
-    //   possibles: newPossibles,
-    // });
+    sendMsg("trade", {
+      // floorSelected: {} as IOption,
+      [playerTurn === 1 ? "handPlayerOne" : "handPlayerTwo"]: handArr,
+      // [playerTurn === 1 ? "handPlayerOneSelected" : "handPlayerTwoSelected"]:
+      // {} as IOption,
+      // moving: false,
+      possibles: newPossibles,
+    });
   }
 
   function move() {
@@ -568,12 +592,6 @@ function OnlineRoom() {
       setFloorSelected({} as IOption);
       setFloorToMoveSelected({} as IOption);
       setMoving(false);
-      // console.log("move 1");
-      // sendMsg("move", {
-      //   floorSelected: {},
-      //   floorToMoveSelected: {},
-      //   moving: false,
-      // });
       return toast.error("Nenhum piso selecionado");
     }
 
@@ -598,13 +616,14 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setFloorToMoveSelected({} as IOption);
     setMoving(false);
-    console.log("move 2");
-    // sendMsg("move", {
-    //   possibles: newPossibles,
-    //   floorSelected: {},
-    //   floorToMoveSelected: {},
-    //   moving: false,
-    // });
+
+    sendMsg("move", {
+      room_id,
+      floorToMoveSelected: {},
+      floorSelected: {},
+      possibles: newPossibles,
+      moving: false,
+    });
   }
 
   useEffect(() => {
@@ -681,6 +700,7 @@ function OnlineRoom() {
       return toast.error("Você perdeu, tempo esgotado!");
     }
     if (playerTurn !== turnToChange) {
+      console.log("changePlayerTurn 2");
       setPlayerTurn(turnToChange);
       if (turnToChange === 2) {
         resumeTwo();
@@ -689,40 +709,26 @@ function OnlineRoom() {
         resume();
         pauseTwo();
       }
-      console.log("changePlayerTurn 2");
-      // sendMsg("changePlayerTurn", {
-      //   playerTurn: turnToChange,
-      // });
-      sendMsg("update", {
+      sendMsg("changePlayerTurn", {
         room_id,
-        possibles,
-        handPlayerOne,
-        handPlayerTwo,
-        floorSelected,
-        floorToMoveSelected,
-        handPlayerOneSelected,
-        handPlayerTwoSelected,
-        moving,
         playerTurn: turnToChange,
-        timerPlayerOneOver,
-        timerPlayerTwoOver,
       });
     }
   }
 
-  useEffect(() => {
-    if (playerTurn !== 0) {
-      console.log("useEffect player turn 2");
+  // useEffect(() => {
+  //   if (playerTurn !== 0) {
+  //     console.log("useEffect player turn 2");
 
-      if (playerTurn === 2) {
-        resumeTwo();
-        pause();
-      } else {
-        resume();
-        pauseTwo();
-      }
-    }
-  }, [playerTurn]);
+  //     if (playerTurn === 2) {
+  //       resumeTwo();
+  //       pause();
+  //     } else {
+  //       resume();
+  //       pauseTwo();
+  //     }
+  //   }
+  // }, [playerTurn]);
 
   useEffect(() => {
     if (!user_id) {
