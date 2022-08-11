@@ -548,7 +548,7 @@ function OnlineRoom() {
         <button className="button" onClick={leaveRoom}>
           Sair
         </button>
-
+        <h2>Sala {room_id}</h2>
         <button className="button" onClick={generateFloors}>
           Reiniciar
         </button>
