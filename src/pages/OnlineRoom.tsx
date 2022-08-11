@@ -265,7 +265,7 @@ function OnlineRoom() {
       if (item.pins.length > 0) {
         setState(item);
         tunMoving();
-        retur nsendMsg();
+        return sendMsg();
       } else {
         setState(item);
         return sendMsg();
