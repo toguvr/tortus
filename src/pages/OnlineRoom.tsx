@@ -180,11 +180,11 @@ function OnlineRoom() {
           setPlayerTurn(Number(msg?.playerTurn));
           if (Number(msg?.playerTurn) === 2) {
             console.log("restartei");
-            startTwo();
+            resumeTwo();
             pause();
           } else {
-            console.log("restartei 2");
-            start();
+            console.log("reresumeei 2");
+            resume();
             pauseTwo();
           }
         }
