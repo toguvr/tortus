@@ -89,12 +89,16 @@ function OnlineRoom() {
 
   const socket = useMemo(() => {
     if (user_id) {
-      return socketio("https://suavitrine.herokuapp.com", {
-        transports: ["websocket"],
-        query: {
-          user_id,
-        },
-      });
+      return socketio(
+        "https://suavitrine.herokuapp.com",
+        // "http://localhost:3333",
+        {
+          transports: ["websocket"],
+          query: {
+            user_id,
+          },
+        }
+      );
     }
   }, [user_id]);
 
@@ -108,38 +112,151 @@ function OnlineRoom() {
     if (room_id) {
       socket?.emit(`newRoom`, room_id);
 
-      socket?.on(`newMsg`, (msg: any) => {
-        setPossibles(msg.possibles);
-        setHandPlayerOne(msg.handPlayerOne);
-        setHandPlayerTwo(msg.handPlayerTwo);
-        setFloorSelected(msg.floorSelected);
-        setFloorToMoveSelected(msg.floorToMoveSelected);
-        setHandPlayerOneSelected(msg.handPlayerOneSelected);
-        setHandPlayerTwoSelected(msg.handPlayerTwoSelected);
-        setMoving(msg.moving);
-        setPlayerTurn(msg.playerTurn);
-        setTimerPlayerOneOver(msg.timerPlayerOneOver);
-        setTimerPlayerTwoOver(msg.timerPlayerTwoOver);
+      socket?.on(`joinRoom`, (msg: any) => {
+        // console.log("novo membro na sala", msg);
+      });
+
+      socket?.on(`update`, (msg: any) => {
+        console.log(msg);
+
+        if (!!msg.restart) {
+          console.log(11);
+          const time = new Date();
+          time.setSeconds(time.getSeconds() + 300);
+          restart(time, false);
+          restartTwo(time, false);
+        }
+        if (msg?.possibles.length > 0) {
+          console.log(0);
+          setPossibles(msg?.possibles);
+        }
+
+        if (msg?.handPlayerOne && msg?.handPlayerOne !== handPlayerOne) {
+          console.log(1);
+          setHandPlayerOne(msg?.handPlayerOne);
+        }
+        if (msg?.handPlayerTwo && msg?.handPlayerTwo !== handPlayerTwo) {
+          console.log(2);
+          setHandPlayerTwo(msg?.handPlayerTwo);
+        }
+        if (msg?.floorSelected && msg?.floorSelected !== floorSelected) {
+          console.log(3);
+          setFloorSelected(msg?.floorSelected);
+        }
+        if (
+          msg?.floorToMoveSelected &&
+          msg?.floorToMoveSelected !== floorToMoveSelected
+        ) {
+          console.log(4);
+          setFloorToMoveSelected(msg?.floorToMoveSelected);
+        }
+        if (
+          msg?.handPlayerOneSelected &&
+          msg?.handPlayerOneSelected !== handPlayerOneSelected
+        ) {
+          console.log(5);
+          setHandPlayerOneSelected(msg?.handPlayerOneSelected);
+        }
+        if (
+          msg?.handPlayerTwoSelected &&
+          msg?.handPlayerTwoSelected !== handPlayerTwoSelected
+        ) {
+          console.log(6);
+          setHandPlayerTwoSelected(msg?.handPlayerTwoSelected);
+        }
+        // if (msg?.moving && msg?.moving !== moving) {
+        //   console.log(7);
+        //   setMoving(msg?.moving);
+        // }
+        if (msg?.playerTurn != playerTurn) {
+          console.log(8);
+
+          setPlayerTurn(msg?.playerTurn);
+        }
+        if (msg?.timerPlayerOneOver !== timerPlayerOneOver) {
+          console.log(9);
+          setTimerPlayerOneOver(msg?.timerPlayerOneOver);
+        }
+        if (msg?.timerPlayerTwoOver !== timerPlayerTwoOver) {
+          console.log(10);
+          setTimerPlayerTwoOver(msg?.timerPlayerTwoOver);
+        }
       });
     }
-  }, [socket]);
+  }, [socket?.id]);
+  // console.log(socket);
 
-  const sendMsg = () => {
-    socket?.emit("newMsg", {
-      room_id,
-      possibles,
-      handPlayerOne,
-      handPlayerTwo,
-      floorSelected,
-      floorToMoveSelected,
-      handPlayerOneSelected,
-      handPlayerTwoSelected,
-      moving,
-      playerTurn,
-      timerPlayerOneOver,
-      timerPlayerTwoOver,
-    });
+  const sendMsg = (type: string, data?: any) => {
+    console.log(type);
+    switch (type) {
+      case "update":
+        return socket?.emit("update", data);
+
+      case "joinRoom":
+        break;
+      case "generateFloors":
+        return socket?.emit("update", {
+          room_id,
+          possibles: data.possibles,
+          handPlayerOne: data.handPlayerOne,
+          handPlayerTwo: data.handPlayerTwo,
+          playerTurn: data.playerTurn,
+          timerPlayerOneOver: data.timerPlayerOneOver,
+          timerPlayerTwoOver: data.timerPlayerTwoOver,
+          restart: true,
+        });
+
+      case "trade":
+        return socket?.emit("update", {
+          room_id,
+          possibles: data.possibles,
+          moving: data.moving,
+          handPlayerOneSelected: data.handPlayerOneSelected ?? {},
+          handPlayerTwoSelected: data.handPlayerTwoSelected ?? {},
+          handPlayerOne: data.handPlayerOne ?? handPlayerOne,
+          handPlayerTwo: data.handPlayerTwo ?? handPlayerTwo,
+          floorSelected: {},
+        });
+
+      case "onFloorClickHandChange":
+        return socket?.emit("update", {
+          room_id,
+          handPlayerOneSelected:
+            data.handPlayerOneSelected ?? handPlayerOneSelected,
+          handPlayerTwoSelected:
+            data.handPlayerTwoSelected ?? handPlayerTwoSelected,
+        });
+
+      case "onFloorClickWithPin":
+        console.log(data);
+        return socket?.emit("update", data);
+      case "onFloorClickWithoutPin":
+        console.log(data);
+        return socket?.emit("update", data);
+      case "onFloorClickToMove":
+        console.log("onFloorClickToMove", data);
+        return socket?.emit("update", data);
+      case "turnFloor":
+        console.log("turnFloor", data);
+        return socket?.emit("update", data);
+      case "rotateFloor":
+        console.log("rotateFloor", data);
+        return socket?.emit("update", data);
+      case "changePlayerTurn":
+        console.log("changePlayerTurn", data);
+        return socket?.emit("update", data);
+      case "move":
+        console.log("move", data);
+        return socket?.emit("update", data);
+      default:
+        return socket?.emit("update", data);
+    }
   };
+
+  const optionsHoles = [
+    { type: "buraco", quantity: 7 },
+    { type: "buraco fim", quantity: 1 },
+  ];
 
   const options = [
     { type: "Y", quantity: 2 },
@@ -150,14 +267,12 @@ function OnlineRoom() {
     { type: "cavalo", quantity: 3 },
     { type: "diagonal duplo sentido", quantity: 1 },
     { type: "y", quantity: 1 },
-    { type: "buraco", quantity: 7 },
     { type: "seta diagonal", quantity: 2 },
     { type: "seta duplo sentido", quantity: 2 },
     { type: "T", quantity: 2 },
     { type: "V", quantity: 1 },
     { type: "estrela", quantity: 4 },
     { type: "x", quantity: 1 },
-    { type: "buraco fim", quantity: 1 },
     { type: "diagonal limite", quantity: 1 },
     { type: "+", quantity: 2 },
     { type: "diagonal dupla", quantity: 1 },
@@ -202,16 +317,34 @@ function OnlineRoom() {
         });
       }
     });
+
     let embaralhado = embaralhar(finalOptions);
 
     const compras = comprar(embaralhado, 6);
+
+    optionsHoles.forEach((option) => {
+      for (let i = 0; i < option.quantity; i++) {
+        finalOptions.push({
+          id: uuid(),
+          type: option.type,
+          rotate: sortear(rotateOptions),
+          tapped: true,
+          pins: [],
+        });
+      }
+    });
+
+    embaralhado = embaralhar(finalOptions);
 
     for (let compra of compras) {
       compra.tapped = false;
     }
 
-    setHandPlayerOne([compras[0], compras[1], compras[2]]);
-    setHandPlayerTwo([compras[3], compras[4], compras[5]]);
+    const playerOneHand = [compras[0], compras[1], compras[2]];
+    const playerTwoHand = [compras[3], compras[4], compras[5]];
+
+    setHandPlayerOne(playerOneHand);
+    setHandPlayerTwo(playerTwoHand);
 
     const startDesvirado = [3, 10, 17, 21, 22, 23, 24, 25, 26, 27, 31, 38, 45];
 
@@ -232,47 +365,52 @@ function OnlineRoom() {
     setTimerPlayerTwoOver(false);
     restart(time, false);
     restartTwo(time, false);
+
+    sendMsg("generateFloors", {
+      possibles: embaralhado,
+      playerTurn: 0,
+      timerPlayerOneOver: false,
+      timerPlayerTwoOver: false,
+      handPlayerOne: playerOneHand,
+      handPlayerTwo: playerTwoHand,
+    });
   }
 
-  useEffect(() => {
-    generateFloors();
-  }, []);
-
-  useEffect(() => {
-    if (
-      handPlayerOne.some(
-        (item) => item.type === "buraco" || item.type === "buraco fim"
-      ) ||
-      handPlayerTwo.some(
-        (item) => item.type === "buraco" || item.type === "buraco fim"
-      )
-    ) {
-      generateFloors();
-    }
-  }, [handPlayerOne, handPlayerTwo]);
-
+  // useEffect(() => {
+  //   generateFloors();
+  // }, []);
   function onFloorClick(
     item: IOption,
     state: IOption,
     setState: React.Dispatch<React.SetStateAction<IOption>>,
-    hand: boolean
+    hand: boolean,
+    player: number
   ) {
     if (hand) {
       setState(item);
-      return sendMsg();
+      return;
+      // return sendMsg("onFloorClickHandChange", {
+      //   handPlayerOneSelected: player === 1 ? item : handPlayerOneSelected,
+      //   handPlayerTwoSelected: player === 2 ? item : handPlayerTwoSelected,
+      // });
     }
     if (!moving) {
       if (item.pins.length > 0) {
         setState(item);
         tunMoving();
-        return sendMsg();
+        return;
+        // console.log("onFloorClick 2");
+        // return sendMsg("onFloorClickWithPin", { floorSelected: item });
       } else {
         setState(item);
-        return sendMsg();
+        return;
+        // sendMsg("onFloorClickWithoutPin", { floorSelected: item });
       }
     }
     setFloorToMoveSelected(item);
-    return sendMsg();
+    return;
+    // console.log("onFloorClick 3");
+    // sendMsg("onFloorClickToMove", { floorToMoveSelected: item });
   }
 
   function turnFloor() {
@@ -290,7 +428,11 @@ function OnlineRoom() {
 
     newPossibles[itemIndex].tapped = !newPossibles[itemIndex].tapped;
     setPossibles(newPossibles);
-    return sendMsg();
+    console.log("turnFloor 1");
+    sendMsg("turnFloor", {
+      possibles: newPossibles,
+    });
+    return;
   }
 
   function rotateFloor(qty: number) {
@@ -312,7 +454,11 @@ function OnlineRoom() {
     newPossibles[itemIndex]!.rotate += qty;
 
     setPossibles(newPossibles);
-    return sendMsg();
+    return;
+    // console.log("rotateFloor 1");
+    // sendMsg("rotateFloor", {
+    //   possibles: newPossibles,
+    // });
   }
 
   function trade() {
@@ -393,15 +539,23 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setHandSelected({} as IOption);
     setMoving(false);
-    sendMsg();
+    // console.log("trade 1");
+    // sendMsg("trade", {
+    //   floorSelected: {} as IOption,
+    //   [playerTurn === 1 ? "handPlayerOne" : "handPlayerTwo"]: handArr,
+    //   [playerTurn === 1 ? "handPlayerOneSelected" : "handPlayerTwoSelected"]:
+    //     {} as IOption,
+    //   moving: false,
+    //   possibles: newPossibles,
+    // });
   }
 
   function move() {
-    if (!floorSelected.id) {
+    if (!floorSelected?.id) {
       return;
     }
 
-    if (!floorToMoveSelected.id) {
+    if (!floorToMoveSelected?.id) {
       return;
     }
 
@@ -414,7 +568,12 @@ function OnlineRoom() {
       setFloorSelected({} as IOption);
       setFloorToMoveSelected({} as IOption);
       setMoving(false);
-      sendMsg();
+      // console.log("move 1");
+      // sendMsg("move", {
+      //   floorSelected: {},
+      //   floorToMoveSelected: {},
+      //   moving: false,
+      // });
       return toast.error("Nenhum piso selecionado");
     }
 
@@ -439,7 +598,13 @@ function OnlineRoom() {
     setFloorSelected({} as IOption);
     setFloorToMoveSelected({} as IOption);
     setMoving(false);
-    sendMsg();
+    console.log("move 2");
+    // sendMsg("move", {
+    //   possibles: newPossibles,
+    //   floorSelected: {},
+    //   floorToMoveSelected: {},
+    //   moving: false,
+    // });
   }
 
   useEffect(() => {
@@ -524,19 +689,38 @@ function OnlineRoom() {
         resume();
         pauseTwo();
       }
-      sendMsg();
+      console.log("changePlayerTurn 2");
+      // sendMsg("changePlayerTurn", {
+      //   playerTurn: turnToChange,
+      // });
+      sendMsg("update", {
+        room_id,
+        possibles,
+        handPlayerOne,
+        handPlayerTwo,
+        floorSelected,
+        floorToMoveSelected,
+        handPlayerOneSelected,
+        handPlayerTwoSelected,
+        moving,
+        playerTurn: turnToChange,
+        timerPlayerOneOver,
+        timerPlayerTwoOver,
+      });
     }
   }
 
   useEffect(() => {
-    sendMsg();
+    if (playerTurn !== 0) {
+      console.log("useEffect player turn 2");
 
-    if (playerTurn === 2) {
-      resumeTwo();
-      pause();
-    } else {
-      resume();
-      pauseTwo();
+      if (playerTurn === 2) {
+        resumeTwo();
+        pause();
+      } else {
+        resume();
+        pauseTwo();
+      }
     }
   }, [playerTurn]);
 
@@ -566,26 +750,27 @@ function OnlineRoom() {
 
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 1 </p>
+          <p>Jogador 1</p>
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
-                selected={handPlayerOneSelected.id === possible.id}
+                selected={handPlayerOneSelected?.id === possible?.id}
                 onClick={() =>
                   onFloorClick(
                     possible,
                     handPlayerOneSelected,
                     setHandPlayerOneSelected,
-                    true
+                    true,
+                    1
                   )
                 }
-                rotate={possible.rotate}
-                key={possible.id}
+                rotate={possible?.rotate}
+                key={possible?.id}
               >
                 <img
                   className="floor"
-                  src={getImage(possible.tapped ? "tapped" : possible.type)}
-                  alt={possible.type}
+                  src={getImage(possible?.tapped ? "tapped" : possible?.type)}
+                  alt={possible?.type}
                 />
               </Floor>
             ))}
@@ -619,25 +804,31 @@ function OnlineRoom() {
         <div className="tabuleiro">
           {possibles.map((possible) => (
             <Floor
-              selected={floorSelected.id === possible.id}
-              selectedMove={floorToMoveSelected.id === possible.id}
+              selected={floorSelected?.id === possible?.id}
+              selectedMove={floorToMoveSelected?.id === possible?.id}
               onClick={() =>
-                onFloorClick(possible, floorSelected, setFloorSelected, false)
+                onFloorClick(
+                  possible,
+                  floorSelected,
+                  setFloorSelected,
+                  false,
+                  0
+                )
               }
-              rotate={possible.rotate}
-              key={possible.id}
+              rotate={possible?.rotate}
+              key={possible?.id}
             >
               <img
                 className="floor"
-                src={getImage(possible.tapped ? "tapped" : possible.type)}
-                alt={possible.type}
+                src={getImage(possible?.tapped ? "tapped" : possible?.type)}
+                alt={possible?.type}
               />
-              {possible.pins.map((pin) => (
+              {possible?.pins.map((pin) => (
                 <img
-                  key={pin.id}
+                  key={pin?.id}
                   className="pin"
-                  src={getImage(pin.color)}
-                  alt={possible.type}
+                  src={getImage(pin?.color)}
+                  alt={possible?.type}
                 />
               ))}
             </Floor>
@@ -650,22 +841,23 @@ function OnlineRoom() {
           <div className="mao">
             {handPlayerTwo.map((possible) => (
               <Floor
-                selected={handPlayerTwoSelected.id === possible.id}
+                selected={handPlayerTwoSelected?.id === possible?.id}
                 onClick={() =>
                   onFloorClick(
                     possible,
                     handPlayerTwoSelected,
                     setHandPlayerTwoSelected,
-                    true
+                    true,
+                    2
                   )
                 }
-                rotate={possible.rotate}
-                key={possible.id}
+                rotate={possible?.rotate}
+                key={possible?.id}
               >
                 <img
                   className="floor"
-                  src={getImage(possible.tapped ? "tapped" : possible.type)}
-                  alt={possible.type}
+                  src={getImage(possible?.tapped ? "tapped" : possible?.type)}
+                  alt={possible?.type}
                 />
               </Floor>
             ))}
