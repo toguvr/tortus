@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "../App.css";
 import { v4 as uuid } from "uuid";
 import { Floor, Timer } from "../styles";
@@ -28,10 +28,10 @@ import X from "../assets/x.png";
 import YSecond from "../assets/yminusculo.png";
 import YFirst from "../assets/Y.png";
 import { toast } from "react-toastify";
-import { useTimer } from "react-timer-hook";
 import { useNavigate, useParams } from "react-router-dom";
 import socketio from "socket.io-client";
 import { routes } from "../routes";
+import { useTimer } from "use-timer";
 
 interface IOption {
   id: string;
@@ -69,32 +69,36 @@ function OnlineRoom() {
   const [timerPlayerOneOver, setTimerPlayerOneOver] = useState(false);
   const [timerPlayerTwoOver, setTimerPlayerTwoOver] = useState(false);
 
-  const timeNew = new Date();
-  timeNew.setSeconds(timeNew.getSeconds() + 300);
-
-  const { seconds, minutes, resume, start, pause, restart } = useTimer({
-    expiryTimestamp: timeNew,
-    onExpire: () => setTimerPlayerOneOver(true),
-    autoStart: false,
-  });
   const {
-    seconds: secondsTwo,
-    minutes: minutesTwo,
-    start: startTwo,
-    resume: resumeTwo,
-    pause: pauseTwo,
-    restart: restartTwo,
+    time: seconds,
+    start: resume,
+    pause,
+    reset: restart,
+    // status,
   } = useTimer({
-    expiryTimestamp: timeNew,
-    onExpire: () => setTimerPlayerTwoOver(true),
-    autoStart: false,
+    initialTime: 300,
+    timerType: "DECREMENTAL",
+    autostart: false,
+    onTimeOver: () => setTimerPlayerOneOver(true),
+  });
+
+  const {
+    time: secondsTwo,
+    start: resumeTwo,
+    pause: pauseTwo,
+    reset: restartTwo,
+  } = useTimer({
+    initialTime: 300,
+    timerType: "DECREMENTAL",
+    autostart: false,
+    onTimeOver: () => setTimerPlayerTwoOver(true),
   });
 
   const socket = useMemo(() => {
     if (user_id) {
       return socketio(
-        "https://suavitrine.herokuapp.com",
-        // "http://localhost:3333",
+        // "https://suavitrine.herokuapp.com",
+        "http://localhost:3333",
         {
           transports: ["websocket"],
           query: {
@@ -116,7 +120,7 @@ function OnlineRoom() {
       socket?.emit(`newRoom`, room_id);
 
       socket?.on(`joinRoom`, (msg: any) => {
-        // console.log("novo membro na sala", msg);
+        console.log("novo membro na sala", msg);
       });
 
       socket?.on(`update`, (msg: any) => {
@@ -124,10 +128,9 @@ function OnlineRoom() {
 
         if (!!msg.restart) {
           console.log(11);
-          const time = new Date();
-          time.setSeconds(time.getSeconds() + 300);
-          restart(time, false);
-          restartTwo(time, false);
+
+          restart();
+          restartTwo();
         }
         if (
           msg?.possibles &&
@@ -179,11 +182,9 @@ function OnlineRoom() {
           console.log(8, msg?.playerTurn);
           setPlayerTurn(Number(msg?.playerTurn));
           if (Number(msg?.playerTurn) === 2) {
-            console.log("restartei");
             resumeTwo();
             pause();
           } else {
-            console.log("reresumeei 2");
             resume();
             pauseTwo();
           }
@@ -374,14 +375,13 @@ function OnlineRoom() {
     embaralhado[1].pins = [{ id: 2, color: "yellow" }];
     embaralhado[47].pins = [{ id: 3, color: "red" }];
     embaralhado[48].pins = [{ id: 4, color: "red" }];
-    const time = new Date();
-    time.setSeconds(time.getSeconds() + 300);
+
     setPossibles(embaralhado);
     setPlayerTurn(0);
     setTimerPlayerOneOver(false);
     setTimerPlayerTwoOver(false);
-    restart(time, false);
-    restartTwo(time, false);
+    restart();
+    restartTwo();
 
     sendMsg("generateFloors", {
       possibles: embaralhado,
@@ -716,25 +716,20 @@ function OnlineRoom() {
     }
   }
 
-  // useEffect(() => {
-  //   if (playerTurn !== 0) {
-  //     console.log("useEffect player turn 2");
-
-  //     if (playerTurn === 2) {
-  //       resumeTwo();
-  //       pause();
-  //     } else {
-  //       resume();
-  //       pauseTwo();
-  //     }
-  //   }
-  // }, [playerTurn]);
-
   useEffect(() => {
     if (!user_id) {
       leaveRoom();
     }
   }, []);
+
+  const twoDigits = (num: number) => {
+    const secondsToDisplay = num % 60;
+    const minutesRemaining = (num - secondsToDisplay) / 60;
+    const minutesToDisplay = minutesRemaining % 60;
+    const segs = String(secondsToDisplay).padStart(2, "0");
+    const mins = String(minutesToDisplay).padStart(2, "0");
+    return mins + ":" + segs;
+  };
 
   return (
     <div className="App">
@@ -750,7 +745,7 @@ function OnlineRoom() {
         </button>
         <h2 style={{ color: "white" }}>Sala {room_id}</h2>
         <button className="button" onClick={generateFloors}>
-          Reiniciar
+          {possibles.length > 0 ? "Reiniciar" : "Iniciar"}
         </button>
       </div>
 
@@ -803,7 +798,7 @@ function OnlineRoom() {
           onClick={() => changePlayerTurn(2)}
           myTurn={playerTurn === 1}
         >
-          {minutes + ":" + seconds}
+          {twoDigits(seconds)}
         </Timer>
       </div>
       <div className="espaco">
@@ -890,7 +885,7 @@ function OnlineRoom() {
           onClick={() => changePlayerTurn(1)}
           myTurn={playerTurn === 2}
         >
-          {minutesTwo + ":" + secondsTwo}
+          {twoDigits(secondsTwo)}
         </Timer>
       </div>
     </div>
