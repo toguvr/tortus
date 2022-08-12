@@ -465,6 +465,7 @@ function OfflineRoom() {
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
+                turn={1}
                 selected={handPlayerOneSelected.id === possible.id}
                 onClick={() =>
                   onFloorClick(
@@ -519,6 +520,7 @@ function OfflineRoom() {
               onClick={() =>
                 onFloorClick(possible, floorSelected, setFloorSelected, false)
               }
+              turn={playerTurn}
               rotate={possible.rotate}
               key={possible.id}
             >
@@ -546,6 +548,7 @@ function OfflineRoom() {
             {handPlayerTwo.map((possible) => (
               <Floor
                 selected={handPlayerTwoSelected.id === possible.id}
+                turn={2}
                 onClick={() =>
                   onFloorClick(
                     possible,

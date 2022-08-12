@@ -781,6 +781,7 @@ function OnlineRoom() {
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
+                turn={1}
                 selected={handPlayerOneSelected?.id === possible?.id}
                 onClick={() =>
                   onFloorClick(
@@ -833,6 +834,7 @@ function OnlineRoom() {
             <Floor
               selected={floorSelected?.id === possible?.id}
               selectedMove={floorToMoveSelected?.id === possible?.id}
+              turn={playerTurn}
               onClick={() =>
                 onFloorClick(
                   possible,
@@ -868,6 +870,7 @@ function OnlineRoom() {
           <div className="mao">
             {handPlayerTwo.map((possible) => (
               <Floor
+                turn={2}
                 selected={handPlayerTwoSelected?.id === possible?.id}
                 onClick={() =>
                   onFloorClick(

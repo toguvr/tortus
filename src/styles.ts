@@ -4,6 +4,7 @@ interface FloorProps {
   rotate: number;
   selected: boolean;
   selectedMove?: boolean;
+  turn: number;
 }
 
 export const Floor = styled.div<FloorProps>`
@@ -16,7 +17,10 @@ export const Floor = styled.div<FloorProps>`
   border: ${(props) =>
     props.selectedMove
       ? "2px solid blue"
-      : props.selected && "2px solid yellow"};
+      : props.selected &&
+        `2px solid ${
+          props.turn === 1 ? "yellow" : props.turn === 2 ? "red" : "purple"
+        }`};
   display: flex;
   justify-content: center;
   align-items: center;
