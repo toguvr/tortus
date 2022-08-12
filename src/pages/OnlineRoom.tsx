@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../App.css";
 import { v4 as uuid } from "uuid";
 import { Floor, Timer } from "../styles";
@@ -63,6 +63,7 @@ function OnlineRoom() {
   const [handPlayerTwoSelected, setHandPlayerTwoSelected] = useState(
     {} as IOption
   );
+  const [playerNumber, setPlayerNumber] = useState(1);
 
   const [moving, setMoving] = useState(false);
   const [playerTurn, setPlayerTurn] = useState(0);
@@ -120,7 +121,8 @@ function OnlineRoom() {
       socket?.emit(`newRoom`, room_id);
 
       socket?.on(`joinRoom`, (msg: any) => {
-        console.log("novo membro na sala", msg);
+        const index = msg.findIndex((user: string) => user === user_id);
+        setPlayerNumber(index + 1);
       });
 
       socket?.on(`update`, (msg: any) => {
@@ -305,6 +307,9 @@ function OnlineRoom() {
     const numero = Math.floor(Math.random() * arr.length);
     return arr[numero];
   }
+  function checkIsMyTurn() {
+    return Number(playerNumber) !== Number(playerTurn) && playerTurn !== 0;
+  }
 
   function embaralhar(cartasParaEmbaralhar: any[]) {
     for (
@@ -400,6 +405,9 @@ function OnlineRoom() {
     hand: boolean,
     player: number
   ) {
+    if (checkIsMyTurn()) {
+      return toast.error("Não é sua vez");
+    }
     if (hand) {
       setState(item);
 
@@ -437,6 +445,9 @@ function OnlineRoom() {
   }
 
   function turnFloor() {
+    if (checkIsMyTurn()) {
+      return toast.error("Não é sua vez");
+    }
     const newPossibles = [...possibles];
     const itemIndex = newPossibles.findIndex(
       (possible) => possible.id === floorSelected.id
@@ -460,6 +471,10 @@ function OnlineRoom() {
   }
 
   function rotateFloor(qty: number) {
+    if (checkIsMyTurn()) {
+      return toast.error("Não é sua vez");
+    }
+
     const newPossibles = [...possibles];
     const itemIndex = newPossibles.findIndex(
       (possible) => possible.id === floorSelected.id
@@ -486,6 +501,10 @@ function OnlineRoom() {
   }
 
   function trade() {
+    if (checkIsMyTurn()) {
+      return toast.error("Não é sua vez");
+    }
+
     const handToSee =
       playerTurn === 1 ? handPlayerOneSelected : handPlayerTwoSelected;
     if (!floorSelected.id) {
@@ -575,6 +594,9 @@ function OnlineRoom() {
   }
 
   function move() {
+    // if (playerNumber! == playerTurn && playerTurn !== 0) {
+    //   return toast.error("Não é sua vez");
+    // }
     if (!floorSelected?.id) {
       return;
     }
@@ -693,6 +715,10 @@ function OnlineRoom() {
   }
 
   function changePlayerTurn(turnToChange: number) {
+    if (checkIsMyTurn()) {
+      return toast.error("Não é sua vez");
+    }
+
     if (turnToChange === 2 && playerTurn === 1 && timerPlayerOneOver) {
       return toast.error("Você perdeu, tempo esgotado!");
     }
@@ -730,7 +756,7 @@ function OnlineRoom() {
     const mins = String(minutesToDisplay).padStart(2, "0");
     return mins + ":" + segs;
   };
-
+  console.log(playerNumber, playerTurn);
   return (
     <div className="App">
       <div
@@ -751,7 +777,7 @@ function OnlineRoom() {
 
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 1</p>
+          <p>{playerNumber === 1 ? "Você" : "Jogador 1"}</p>
           <div className="mao">
             {handPlayerOne.map((possible) => (
               <Floor
@@ -776,7 +802,7 @@ function OnlineRoom() {
               </Floor>
             ))}
           </div>
-          {playerTurn === 1 && (
+          {playerTurn === 1 && playerNumber === 1 && (
             <div>
               <button className="button" onClick={trade}>
                 {"Trocar"}
@@ -838,7 +864,7 @@ function OnlineRoom() {
       </div>
       <div className="hand">
         <header className="App-header">
-          <p>Jogador 2</p>
+          <p>{playerNumber === 2 ? "Você" : "Jogador 2"}</p>
           <div className="mao">
             {handPlayerTwo.map((possible) => (
               <Floor
@@ -863,7 +889,7 @@ function OnlineRoom() {
               </Floor>
             ))}
           </div>
-          {playerTurn === 2 && (
+          {playerTurn === 2 && playerNumber === 2 && (
             <div>
               <button className="button" onClick={trade}>
                 {"Trocar"}
