@@ -79,6 +79,7 @@ function OnlineRoom() {
   } = useTimer({
     initialTime: 300,
     timerType: "DECREMENTAL",
+    endTime: 0,
     autostart: false,
     onTimeOver: () => setTimerPlayerOneOver(true),
   });
@@ -92,6 +93,7 @@ function OnlineRoom() {
     initialTime: 300,
     timerType: "DECREMENTAL",
     autostart: false,
+    endTime: 0,
     onTimeOver: () => setTimerPlayerTwoOver(true),
   });
 

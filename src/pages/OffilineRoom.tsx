@@ -29,6 +29,8 @@ import YSecond from "../assets/yminusculo.png";
 import YFirst from "../assets/Y.png";
 import { toast } from "react-toastify";
 import { useTimer } from "react-timer-hook";
+import { routes } from "../routes";
+import { useNavigate } from "react-router-dom";
 
 interface IOption {
   id: string;
@@ -55,7 +57,7 @@ function OfflineRoom() {
   const [handPlayerTwoSelected, setHandPlayerTwoSelected] = useState(
     {} as IOption
   );
-
+  const navigate = useNavigate();
   const [moving, setMoving] = useState(false);
   const [playerTurn, setPlayerTurn] = useState(1);
   const [timerPlayerOneOver, setTimerPlayerOneOver] = useState(false);
@@ -455,10 +457,20 @@ function OfflineRoom() {
 
   return (
     <div className="App">
-      <button className="button" onClick={generateFloors}>
-        Reiniciar
-      </button>
-
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <button className="button" onClick={() => navigate(routes.home)}>
+          Sair
+        </button>
+        <button className="button" onClick={generateFloors}>
+          Reiniciar
+        </button>
+      </div>
       <div className="hand">
         <header className="App-header">
           <p>Jogador 1 </p>

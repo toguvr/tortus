@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { routes } from "../routes";
 
 // import { Container } from './styles';
 
@@ -9,7 +10,7 @@ const Home: React.FC = () => {
   return (
     <div>
       <h1>Jogar Offline</h1>
-      <Link to={`/offline`}>clique aqui</Link>
+      <Link to={routes.offlineRoom}>clique aqui</Link>
       <br />
       <h1>Jogar Online</h1>
       <Link to={`/online/${uuidv4()}`}>Criar Sala</Link>
