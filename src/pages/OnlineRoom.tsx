@@ -100,8 +100,8 @@ function OnlineRoom() {
   const socket = useMemo(() => {
     if (user_id) {
       return socketio(
-        // "https://suavitrine.herokuapp.com",
-        "http://localhost:3333",
+        "https://suavitrine.herokuapp.com",
+        // "http://localhost:3333",
         {
           transports: ["websocket"],
           query: {
