@@ -438,6 +438,16 @@ function OnlineRoom() {
         return;
       }
     }
+    if (!floorSelected.id && !hand) {
+      setState(item);
+      sendMsg("onFloorClickWithoutPin", {
+        room_id,
+        floorSelected: item,
+      });
+      tunMoving();
+      return;
+    }
+
     setFloorToMoveSelected(item);
 
     sendMsg("onFloorClickToMove", {
