@@ -505,11 +505,12 @@ function OnlineRoom() {
     newPossibles[itemIndex]!.rotate += qty;
 
     setPossibles(newPossibles);
+    sendMsg("rotateFloor", {
+      room_id,
+      possibles: newPossibles,
+    });
     return;
     // console.log("rotateFloor 1");
-    // sendMsg("rotateFloor", {
-    //   possibles: newPossibles,
-    // });
   }
 
   function trade() {
