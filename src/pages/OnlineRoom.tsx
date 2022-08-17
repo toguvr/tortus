@@ -119,7 +119,9 @@ function OnlineRoom() {
   };
 
   async function getRoom() {
-    const res = await fetch(`https://suavitrine.herokuapp.com/room/${room_id}`);
+    const res = await fetch(
+      `https://suavitrine.herokuapp.com/room/${room_id}/user/${user_id}`
+    );
     const app = await res.json();
     if (app.room) {
       const index = app.room.findIndex((user: string) => user === user_id);
