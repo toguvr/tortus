@@ -603,6 +603,12 @@ function OnlineRoom() {
     newPossibles[itemFloorIndex] = currentOnHand;
     handArr[itemHandIndex] = currentOnFloor;
 
+    if (handArr.some((floor) => floor.type === "buraco fim")) {
+      toast.success("Você ganhou!!");
+    } else if (handArr.every((floor) => floor.type === "buraco")) {
+      toast.success("Você ganhou!!");
+    }
+
     const setHand = playerTurn === 1 ? setHandPlayerOne : setHandPlayerTwo;
     setPossibles(newPossibles);
     setHand(handArr);
