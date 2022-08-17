@@ -132,7 +132,7 @@ function OnlineRoom() {
 
         if (!!msg.restart) {
           console.log(11);
-
+          setPlayerTurn(0);
           restart();
           restartTwo();
         }
@@ -182,7 +182,10 @@ function OnlineRoom() {
           console.log(7);
           setMoving(msg?.moving);
         }
-        if (msg?.playerTurn && Number(msg?.playerTurn) !== playerTurn) {
+        if (
+          msg?.playerTurn !== undefined &&
+          Number(msg?.playerTurn) !== playerTurn
+        ) {
           console.log(8, msg?.playerTurn);
           setPlayerTurn(Number(msg?.playerTurn));
           if (Number(msg?.playerTurn) === 2) {
