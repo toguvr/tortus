@@ -118,6 +118,19 @@ function OnlineRoom() {
     navigate(routes.home);
   };
 
+  async function getRoom() {
+    const res = await fetch(`https://suavitrine.herokuapp.com/room/${room_id}`);
+    const app = await res.json();
+    if (app.room) {
+      const index = app.room.findIndex((user: string) => user === user_id);
+      setPlayerNumber(index + 1);
+    }
+  }
+
+  useEffect(() => {
+    getRoom();
+  }, []);
+
   useEffect(() => {
     if (room_id) {
       socket?.emit(`newRoom`, room_id);
