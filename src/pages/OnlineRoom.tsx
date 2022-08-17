@@ -136,8 +136,7 @@ function OnlineRoom() {
       socket?.emit(`newRoom`, room_id);
 
       socket?.on(`joinRoom`, (msg: any) => {
-        const index = msg.findIndex((user: string) => user === user_id);
-        setPlayerNumber(index + 1);
+        getRoom();
       });
 
       socket?.on(`update`, (msg: any) => {
