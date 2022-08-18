@@ -931,22 +931,24 @@ function OnlineRoom() {
             ))}
           </div>
         </header>
-        {playerTurn === 2 && playerNumber === 2 && (
-          <div className="grid-button">
-            <button className="button-mov" onClick={trade}>
-              {"Trocar"}
-            </button>
-            <button className="button-mov" onClick={turnFloor}>
-              Virar
-            </button>
-            <button className="button-mov" onClick={() => rotateFloor(-90)}>
-              {"Rodar <"}
-            </button>
-            <button className="button-mov" onClick={() => rotateFloor(90)}>
-              {"Rodar >"}
-            </button>
-          </div>
-        )}
+        <div>
+          {playerTurn === 2 && playerNumber === 2 && (
+            <div className="grid-button">
+              <button className="button-mov" onClick={trade}>
+                {"Trocar"}
+              </button>
+              <button className="button-mov" onClick={turnFloor}>
+                Virar
+              </button>
+              <button className="button-mov" onClick={() => rotateFloor(-90)}>
+                {"Rodar <"}
+              </button>
+              <button className="button-mov" onClick={() => rotateFloor(90)}>
+                {"Rodar >"}
+              </button>
+            </div>
+          )}
+        </div>
         <Timer
           timeOver={timerPlayerTwoOver}
           onClick={() => changePlayerTurn(1)}
