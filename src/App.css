@@ -98,3 +98,17 @@
     grid-auto-rows: 42px;
   }
 }
+
+.grid-button{
+  display: grid;
+  grid-template-columns: repeat(2, 63px);
+  border: #61dafb 2px solid;
+  grid-auto-rows: 63px;
+}
+
+.button-mov{
+  border-radius: 4px;
+  background: linear-gradient(to bottom right, #9ec8ad,#61dafb);
+  cursor: pointer;
+  color: black;
+}

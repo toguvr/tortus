@@ -839,23 +839,25 @@ function OnlineRoom() {
               </Floor>
             ))}
           </div>
+        </header>
+        <div>
           {playerTurn === 1 && playerNumber === 1 && (
-            <div>
-              <button className="button" onClick={trade}>
+            <div className="grid-button">
+              <button className="button-mov" onClick={trade}>
                 {"Trocar"}
               </button>
-              <button className="button" onClick={turnFloor}>
+              <button className="button-mov" onClick={turnFloor}>
                 Virar
               </button>
-              <button className="button" onClick={() => rotateFloor(-90)}>
+              <button className="button-mov" onClick={() => rotateFloor(-90)}>
                 {"Rodar <"}
               </button>
-              <button className="button" onClick={() => rotateFloor(90)}>
+              <button className="button-mov" onClick={() => rotateFloor(90)}>
                 {"Rodar >"}
               </button>
             </div>
           )}
-        </header>
+        </div>
         <Timer
           timeOver={timerPlayerOneOver}
           onClick={() => changePlayerTurn(2)}
@@ -928,23 +930,23 @@ function OnlineRoom() {
               </Floor>
             ))}
           </div>
-          {playerTurn === 2 && playerNumber === 2 && (
-            <div>
-              <button className="button" onClick={trade}>
-                {"Trocar"}
-              </button>
-              <button className="button" onClick={turnFloor}>
-                Virar
-              </button>
-              <button className="button" onClick={() => rotateFloor(-90)}>
-                {"Rodar <"}
-              </button>
-              <button className="button" onClick={() => rotateFloor(90)}>
-                {"Rodar >"}
-              </button>
-            </div>
-          )}
         </header>
+        {playerTurn === 2 && playerNumber === 2 && (
+          <div className="grid-button">
+            <button className="button-mov" onClick={trade}>
+              {"Trocar"}
+            </button>
+            <button className="button-mov" onClick={turnFloor}>
+              Virar
+            </button>
+            <button className="button-mov" onClick={() => rotateFloor(-90)}>
+              {"Rodar <"}
+            </button>
+            <button className="button-mov" onClick={() => rotateFloor(90)}>
+              {"Rodar >"}
+            </button>
+          </div>
+        )}
         <Timer
           timeOver={timerPlayerTwoOver}
           onClick={() => changePlayerTurn(1)}
